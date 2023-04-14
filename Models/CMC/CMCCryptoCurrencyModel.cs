@@ -35,9 +35,9 @@ namespace Cvolcy.DelicateDust.Models.CMC
         [JsonPropertyName("is_fiat")]
         public byte IsFiat { get; set; }
         [JsonPropertyName("self_reported_circulating_supply")]
-        public double SelfReportedCirculatingSupply { get; set; }
+        public double? SelfReportedCirculatingSupply { get; set; }
         [JsonPropertyName("self_reported_market_cap")]
-        public double SelfReportedMarketCap { get; set; }
+        public double? SelfReportedMarketCap { get; set; }
         [JsonPropertyName("tvl_ratio")]
         public string TvlRatio { get; set; }
         [JsonPropertyName("last_updated")]
