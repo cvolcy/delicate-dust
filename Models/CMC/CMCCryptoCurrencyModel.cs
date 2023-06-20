@@ -21,7 +21,7 @@ namespace Cvolcy.DelicateDust.Models.CMC
         [JsonPropertyName("tags")]
         public IEnumerable<CMCTag> Tags { get; set; }
         [JsonPropertyName("max_supply")]
-        public long MaxSupply { get; set; }
+        public long? MaxSupply { get; set; }
         [JsonPropertyName("circulating_supply")]
         public double CirculatingSupply { get; set; }
         [JsonPropertyName("total_supply")]
@@ -29,7 +29,7 @@ namespace Cvolcy.DelicateDust.Models.CMC
         [JsonPropertyName("is_active")]
         public byte IsActive { get; set; }
         [JsonPropertyName("platform")]
-        public string Platform { get; set; }
+        public object Platform { get; set; }
         [JsonPropertyName("cmc_rank")]
         public int CmcRank { get; set; }
         [JsonPropertyName("is_fiat")]
