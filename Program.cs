@@ -1,15 +1,22 @@
+using Azure.AI.Inference;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
 var host = new HostBuilder()
     .ConfigureFunctionsWebApplication()
-    .ConfigureServices(services =>
+    .ConfigureServices((context, services) =>
     {
         services.AddApplicationInsightsTelemetryWorkerService();
         services.ConfigureFunctionsApplicationInsights();
 
         services.AddHttpClient();
+        services.AddChatClient(new ChatCompletionsClient(
+            endpoint: new System.Uri("https://models.inference.ai.azure.com"),
+            new Azure.AzureKeyCredential(context.Configuration.GetValue<string>("GITHUB_INFERENCE_TOKEN"))
+        ).AsIChatClient("gpt-4o-mini"));
     })
     .Build();
 
