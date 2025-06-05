@@ -28,7 +28,7 @@ namespace Cvolcy.DelicateDust.Functions
 
             try
             {
-                var prompt = "Choose a random, **sophisticated and uncommon** word. " +
+                var prompt = $"Choose a random **sophisticated and uncommon** word. (random seed {new Random().Next()})" +
                              "Provide a concise, clear definition. " +
                              "Return it in the format of " +
                              "{ \"fr\": { \"word\": \"random_word_in_french\", \"definition\": \"definition_in_french\" }, " +
