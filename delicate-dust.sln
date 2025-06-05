@@ -1,0 +1,24 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "delicate-dust", "delicate-dust.csproj", "{2BD8E979-B7FF-0D3A-92D6-20CD45CEBBCD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2BD8E979-B7FF-0D3A-92D6-20CD45CEBBCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BD8E979-B7FF-0D3A-92D6-20CD45CEBBCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BD8E979-B7FF-0D3A-92D6-20CD45CEBBCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BD8E979-B7FF-0D3A-92D6-20CD45CEBBCD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {29A93319-8A1C-4CAC-984C-03B9889D381D}
+	EndGlobalSection
+EndGlobal

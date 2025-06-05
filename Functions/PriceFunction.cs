@@ -1,7 +1,5 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Net.Http;
@@ -11,26 +9,31 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Configuration;
 using System;
+using Microsoft.Azure.Functions.Worker;
+using System.Net.Http.Json;
 
 namespace Cvolcy.DelicateDust.Functions
 {
     public class PriceFunction
     {
+        private readonly ILogger<PriceFunction> log;
         private readonly IConfiguration _config;
         private readonly HttpClient _httpClient;
 
         public PriceFunction(
+            ILogger<PriceFunction> log,
             IConfiguration config,
             HttpClient httpClient)
         {
+            this.log = log;
             _config = config;
             _httpClient = httpClient;
         }
 
-        [FunctionName("Price")]
+        [Function ("Price")]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "Price/{slugs}")] HttpRequest req,
-            string slugs, ILogger log)
+            string slugs)
         {
             log.LogInformation($"C# HTTP trigger function processed a request.{Environment.GetEnvironmentVariable("WEBSITE_HOSTNAME")} - {Environment.GetEnvironmentVariable("HTTPS")}");
 
@@ -81,7 +84,7 @@ namespace Cvolcy.DelicateDust.Functions
             var baseUrl = $"http{(string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("HTTPS")) ? "" : "s")}://{Environment.GetEnvironmentVariable("WEBSITE_HOSTNAME")}/api";
 
             var resp = await _httpClient.GetAsync($"{baseUrl}/Cache/cache/price:{slug}");
-            var obj = await resp.Content.ReadAsAsync<reponseJSON>();
+            var obj = await resp.Content.ReadFromJsonAsync<reponseJSON>();
 
             if (obj != null) return obj.Json.ToString();
 

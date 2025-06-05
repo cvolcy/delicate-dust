@@ -1,32 +1,34 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using System;
-using Azure.Data.Tables;
 using Azure;
 using System.Linq;
 using System.IO;
+using Microsoft.Azure.Functions.Worker;
+using Azure.Data.Tables;
 
 namespace Cvolcy.DelicateDust.Functions
 {
     public class CacheFunction
     {
+        private readonly ILogger<CacheFunction> log;
         private readonly IConfiguration _config;
 
         public CacheFunction(
+            ILogger<CacheFunction> log,
             IConfiguration config)
         {
+            this.log = log;
             _config = config;
         }
 
-        [FunctionName("CacheGet")]
+        [Function ("CacheGet")]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "Cache/{partition}/{key}")] HttpRequest req,
-            [Table("Cache", Connection = "AzureWebJobsStorage")] TableClient cacheTable, string partition, string key, ILogger log)
+            [TableInput("Cache", Connection = "AzureWebJobsStorage")] TableClient cacheTable, string partition, string key)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
@@ -41,10 +43,10 @@ namespace Cvolcy.DelicateDust.Functions
             return null;
         }
 
-        [FunctionName("CacheCreate")]
+        [Function ("CacheCreate")]
         public async Task<IActionResult> RunInsert(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = "Cache/{partition}/{key}")] HttpRequest req,
-            [Table("Cache", Connection = "AzureWebJobsStorage")] TableClient cacheTable, string partition, string key, ILogger log)
+            [TableInput("Cache", Connection = "AzureWebJobsStorage")] TableClient cacheTable, string partition, string key)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
