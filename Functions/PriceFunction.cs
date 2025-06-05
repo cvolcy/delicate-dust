@@ -83,9 +83,7 @@ namespace Cvolcy.DelicateDust.Functions
                     return MapResultsToJson(cmcResponse, slugs);
                 });
 
-                var finalResult = JsonSerializer.Deserialize<List<object>>(resultJsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-                return new OkObjectResult(finalResult);
+                return new OkObjectResult(resultJsonString);
             }
             catch (HttpRequestException ex)
             {
@@ -120,8 +118,13 @@ namespace Cvolcy.DelicateDust.Functions
         {
             var requestedSlugs = slugs.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
 
-            var mappedResults = new List<object>();
+            if (requestedSlugs.Count == 1)
+            {
+                var usdQuote = responseModel.Data?.Values.FirstOrDefault().Quote.FirstOrDefault(x => x.Key == "USD").Value;
+                return JsonSerializer.Serialize(usdQuote.Price, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
+            }
 
+            var mappedResults = new List<object>();
             foreach (var requestedSlug in requestedSlugs)
             {
                 var foundEntry = responseModel.Data?.Values
