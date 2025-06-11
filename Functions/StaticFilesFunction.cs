@@ -29,9 +29,9 @@ namespace Cvolcy.DelicateDust.Functions
         /// - <see cref="NotFoundResult"/> (HTTP 404) if the file does not exist or path is invalid.
         /// - <see cref="StatusCodeResult"/> (HTTP 500 Internal Server Error) on other unexpected errors.
         /// </returns>
-        [Function("StaticFile")] // Renamed function for clarity
-        public IActionResult GetStaticFile( // Renamed method for clarity
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "Static/{file}")] HttpRequest req,
+        [Function("StaticFile")]
+        public IActionResult GetStaticFile(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "Static/{file}")] HttpRequest req,
             string file)
         {
             _logger.LogInformation("StaticFile: C# HTTP trigger function received request for file '{FileName}' at URL '{RequestPath}'.", file, req.Path);
