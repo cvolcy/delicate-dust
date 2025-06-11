@@ -71,8 +71,7 @@
                 try {
                 // Register a periodic sync task for daily updates
                 await registration.periodicSync.register('daily-notification-sync', {
-                    // minInterval: 24 * 60 * 60 * 1000, // Minimum interval of one day in milliseconds
-                    minInterval: 1000 * 20, // Minimum interval of 20 seconds
+                    minInterval: 24 * 60 * 60 * 1000, // Minimum interval of one day in milliseconds
                 });
                     console.log('Periodic background sync for daily notifications registered.');
                 } catch (err) {
