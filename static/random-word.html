@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Word</title>
+    <link rel="manifest" href='/api/static/rw-manifest.json' />
+</head>
+<body>
+    <h1>Random Word</h1>
+    <div id="app">
+        {{ message }}
+        <button
+            v-if="!notificationPermission"
+            @click="registerNotifications"
+        >
+            Register Notifications
+        </button>
+    </div>
+    <script type="module">
+        import { createApp, ref } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+
+        createApp({
+            setup() {
+                const message = ref('Hello Vue!');
+                const notificationPermission = ref(false);
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        notificationPermission.value = true;
+                    }
+                });
+
+                return { message, notificationPermission };
+            },
+            methods: {
+                registerNotifications() {
+                    Notification.requestPermission().then(permission => {
+                        if (permission === 'granted') {
+                            this.notificationPermission = true;
+                        }
+                    });
+                }
+            }
+        }).mount('#app');
+    </script>
+    <script>
+    async function checkPeriodicSyncPermission() {
+        const status = await navigator.permissions.query({ name: 'periodic-background-sync' });
+        await navigator.serviceWorker.ready;
+        if (status.state === 'granted') {
+            // Periodic background sync can be used.
+            console.log('Periodic Background Sync permission granted.');
+            return true;
+        } else {
+            // Permission not granted or not supported.
+            console.log('Periodic Background Sync permission not granted or not supported.');
+            // Inform the user or provide alternative functionality.
+            return false;
+        }
+    }
+
+    if('serviceWorker' in navigator) {
+        navigator.serviceWorker.register("/api/static/rw-service-worker.js", { scope: '/' })
+        .then(async (registration) => {
+            console.log('Service Worker registered with scope:', registration.scope);
+
+            // Check for periodic background sync permission
+            const permissionGranted = await checkPeriodicSyncPermission();
+
+            if (permissionGranted && 'periodicSync' in registration) {
+                try {
+                // Register a periodic sync task for daily updates
+                await registration.periodicSync.register('daily-notification-sync', {
+                    // minInterval: 24 * 60 * 60 * 1000, // Minimum interval of one day in milliseconds
+                    minInterval: 1000 * 20, // Minimum interval of 20 seconds
+                });
+                    console.log('Periodic background sync for daily notifications registered.');
+                } catch (err) {
+                    console.error('Periodic Sync could not be registered:', err.name, err.message);
+                }
+            } else {
+                console.warn('Periodic Background Sync not supported or permission not granted.');
+            }
+        })
+        .catch((error) => {
+            console.error('Service Worker registration failed:', error);
+        });
+    }
+    </script>
+</body>
+</html>

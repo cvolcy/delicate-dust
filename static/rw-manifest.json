@@ -1,0 +1,20 @@
+{
+    "theme_color": "#8a7c9c",
+    "background_color": "#9a18f2",
+    "orientation": "portrait",
+    "display": "standalone",
+    "dir": "auto",
+    "lang": "fr-CA",
+    "name": "Daily Random Word app",
+    "short_name": "random word",
+    "start_url": "/api/static/random-word.html",
+    "description": "A basic random word application that send daily notification.",
+    "id": "d158c49e-97f9-4106-b374-507b62ac11f6",
+    "icons": [
+        {
+            "src": "/api/static/rw-icon.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        }
+    ]
+}
