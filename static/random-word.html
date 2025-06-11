@@ -60,7 +60,7 @@
     }
 
     if('serviceWorker' in navigator) {
-        navigator.serviceWorker.register("/api/static/rw-service-worker.js", { scope: '/' })
+        navigator.serviceWorker.register("/api/static/rw-service-worker.js", { scope: '/api/static/' })
         .then(async (registration) => {
             console.log('Service Worker registered with scope:', registration.scope);
 
