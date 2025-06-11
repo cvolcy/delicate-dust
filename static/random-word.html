@@ -16,6 +16,13 @@
         >
             Register Notifications
         </button>
+        <button
+            v-if="notificationPermission"
+            @click="showNotification"
+            :disabled="isFetchingWord"
+        >
+            Get Random Word
+        </button>
     </div>
     <script type="module">
         import { createApp, ref } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
@@ -24,13 +31,15 @@
             setup() {
                 const message = ref('Hello Vue!');
                 const notificationPermission = ref(false);
+                const isFetchingWord = ref(false);
+
                 Notification.requestPermission().then(permission => {
                     if (permission === 'granted') {
                         notificationPermission.value = true;
                     }
                 });
 
-                return { message, notificationPermission };
+                return { message, notificationPermission, isFetchingWord };
             },
             methods: {
                 registerNotifications() {
@@ -39,6 +48,41 @@
                             this.notificationPermission = true;
                         }
                     });
+                },
+                async showNotification() {
+                    try {
+                        this.isFetchingWord = true;
+
+                        if (this.notificationPermission) {
+                            navigator.serviceWorker.ready.then(async registration => {
+                                const randomWord = await (await fetch("/api/randomword")).json();
+                                const randomWordLocalized = randomWord.fr;
+    
+                                const title = 'Daily Update : ' + randomWordLocalized.word;
+                                const options = {
+                                    body: randomWordLocalized.definition,
+                                    tag: 'daily-update-notification',
+                                    renotify: true, // Optional: ensures new notification is shown if tag is reused
+                                    requireInteraction: false, // Optional: notification disappears after a short time on desktop
+                                    data: {
+                                        timestamp: Date.now(),
+                                        notificationType: 'daily_update'
+                                    }
+                                };
+    
+                                registration.showNotification(title, options)
+                                    .then(() => {
+                                        console.log('Daily notification displayed successfully!');
+                                    })
+                                    .catch((error) => {
+                                        console.error('Failed to show daily notification:', error);
+                                    });
+                            });
+                        }
+                    }
+                    finally {
+                        this.isFetchingWord = false;
+                    }
                 }
             }
         }).mount('#app');
