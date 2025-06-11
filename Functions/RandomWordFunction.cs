@@ -21,7 +21,7 @@ namespace Cvolcy.DelicateDust.Functions
     {
         [Function("RandomWord")]
         public async Task<IActionResult> GetRandomWord(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "RandomWord")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "RandomWord")] HttpRequest req,
             CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("RandomWord: C# HTTP trigger function received a request to generate a random word.");

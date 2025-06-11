@@ -40,9 +40,9 @@ this.addEventListener('periodicsync', (event) => {
 });
 
 async function showDailyNotification() {
-    // const randomWord = await (await fetch("/api/randomword")).json();
-    // const randomWordLocalized = randomWord.fr;
-    const randomWordLocalized = { word: 'test', definition: 'test' };
+    const randomWord = await (await fetch("/api/randomword")).json();
+    const randomWordLocalized = randomWord.fr;
+    // const randomWordLocalized = { word: 'test', definition: 'test' };
 
     const title = 'Daily Update : ' + randomWordLocalized.word;
     const options = {
