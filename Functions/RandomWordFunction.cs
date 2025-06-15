@@ -31,8 +31,8 @@ namespace Cvolcy.DelicateDust.Functions
                 var prompt = $"Choose a random **sophisticated and uncommon** word. (random seed {new Random().Next()})" +
                              "Provide a concise, clear definition. " +
                              "Return it in the format of " +
-                             "{ \"fr\": { \"word\": \"random_word_in_french\", \"definition\": \"definition_in_french\" }, " +
-                             "\"en\": { \"word\": \"random_word_in_english\", \"definition\": \"definition_in_english\" } } " +
+                             "{ \"fr\": { \"word\": \"random_word_in_french\", \"definition\": \"definition_in_french\", \"example\": \"phrase_example_in_french\" }, " +
+                             "\"en\": { \"word\": \"random_word_in_english\", \"definition\": \"definition_in_english\", \"example\": \"phrase_example_in_english\" } } " +
                              "and nothing else. Ensure all values are valid JSON strings and strictly adhere to this format.";
 
                 var chatResponse = await _chatClient.GetResponseAsync(prompt, cancellationToken: cancellationToken);
@@ -88,6 +88,7 @@ namespace Cvolcy.DelicateDust.Functions
     {
         public string Word { get; set; }
         public string Definition { get; set; }
+        public string Example { get; set; }
     }
 
     public class WordResponseModel
