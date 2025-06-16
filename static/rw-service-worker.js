@@ -51,9 +51,9 @@ async function showDailyNotification() {
     localStorage.setItem('app_data', JSON.stringify(data));
     // END TODO
 
-    const title = 'Daily Update : ' + randomWordLocalized.word;
+    const title = 'Word Update : ' + randomWordLocalized.word;
     const options = {
-        body: randomWordLocalized.definition,
+        body: `${randomWordLocalized.definition} \n\n ${randomWordLocalized.example}`,
         tag: 'daily-update-notification',
         renotify: true, // Optional: ensures new notification is shown if tag is reused
         requireInteraction: false, // Optional: notification disappears after a short time on desktop
