@@ -44,6 +44,13 @@ async function showDailyNotification() {
     const randomWordLocalized = randomWord.fr;
     // const randomWordLocalized = { word: 'test', definition: 'test' };
 
+    // TODO change for a specialized service
+    const data = JSON.parse(localStorage.getItem('app_data')) || {};
+    data.words = (data.words || []);
+    data.words.push({...randomWord, v: 1, date: new Date().toISOString() });
+    localStorage.setItem('app_data', JSON.stringify(data));
+    // END TODO
+
     const title = 'Daily Update : ' + randomWordLocalized.word;
     const options = {
         body: randomWordLocalized.definition,

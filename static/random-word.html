@@ -3,26 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Word</title>
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3pro.css">
     <link rel="manifest" href='/api/static/rw-manifest.json' />
+    <title>Random Word</title>
 </head>
 <body>
-    <h1>Random Word</h1>
     <div id="app">
-        {{ message }}
-        <button
-            v-if="!notificationPermission"
-            @click="registerNotifications"
-        >
-            Register Notifications
-        </button>
-        <button
-            v-if="notificationPermission"
-            @click="showNotification"
-            :disabled="isFetchingWord"
-        >
-            Get Random Word
-        </button>
+        <div class="w3-container w3-paper">
+            <div class="logo-container" style="display: flex; justify-content: center; align-items: center; padding: 10px;">
+                <img src="/api/static/rw-icon.png" class="w3-round w3-border w3-padding" width="130px" alt="Logo">
+            </div>
+            <div class="w3-card w3-padding">
+                <h1>Random Word</h1>
+                <p>
+                    {{ message }}
+                </p>
+
+                <a
+                    v-if="!notificationPermission"
+                    @click="registerNotifications"
+                    class="w3-button w3-large w3-xlarge w3-ripple w3-grey"
+                >
+                    Register Notifications
+                </a>
+                <a
+                    v-if="notificationPermission"
+                    class="w3-button w3-large w3-circle w3-xlarge w3-ripple w3-grey"
+                    @click="showNotification"
+                    :disabled="isFetchingWord"
+                >+</a>
+            </div>
+        </div>
     </div>
     <script type="module">
         import { createApp, ref } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
