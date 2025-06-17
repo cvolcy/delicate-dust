@@ -33,6 +33,9 @@
                     :disabled="isFetchingWord"
                 >+</a>
             </div>
+            <div class="w3-card w3-padding">
+                <pre><code>{{ JSON.stringify(appData, null, 2) }}</code></pre>
+            </div>
         </div>
     </div>
     <script type="module">
@@ -43,6 +46,7 @@
                 const message = ref('Hello Vue!');
                 const notificationPermission = ref(false);
                 const isFetchingWord = ref(false);
+                const appData = ref(JSON.parse(localStorage.getItem('app_data')) || {});
 
                 Notification.requestPermission().then(permission => {
                     if (permission === 'granted') {
@@ -50,7 +54,7 @@
                     }
                 });
 
-                return { message, notificationPermission, isFetchingWord };
+                return { message, notificationPermission, isFetchingWord, appData };
             },
             methods: {
                 registerNotifications() {
