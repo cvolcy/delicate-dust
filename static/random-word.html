@@ -67,7 +67,8 @@
                         if (this.notificationPermission) {
                             navigator.serviceWorker.ready.then(async registration => {
                                 const randomWord = await (await fetch("/api/randomword")).json();
-                                const randomWordLocalized = randomWord.fr;
+                                // const randomWord = JSON.parse(`{"fr": {"word": "épistolaire","definition": "relatif à l'art ou à la pratique de la correspondance écrite","example": "Son style épistolaire a captivé de nombreux lecteurs."},"en": {"word": "epistolary","definition": "relating to the art or practice of correspondence through letters","example": "Her epistolary style captivated many readers."}}`);
+                                const { fr: randomWordLocalized } = randomWord;
     
                                 const title = 'Word Update : ' + randomWordLocalized.word;
                                 const options = {
@@ -124,15 +125,16 @@
 
             if (permissionGranted && 'periodicSync' in registration) {
                 try {
-                // Register a periodic sync task for daily updates
-                await registration.periodicSync.register('daily-notification-sync', {
-                    minInterval: 24 * 60 * 60 * 1000, // Minimum interval of one day in milliseconds
-                });
+                    // Register a periodic sync task for daily updates
+                    await registration.periodicSync.register('daily-notification-sync', {
+                        minInterval: 12 * 60 * 60 * 1000, // Minimum interval of one day in milliseconds
+                    });
                     console.log('Periodic background sync for daily notifications registered.');
                 } catch (err) {
                     console.error('Periodic Sync could not be registered:', err.name, err.message);
                 }
-            } else {
+            }
+            else {
                 console.warn('Periodic Background Sync not supported or permission not granted.');
             }
         })
