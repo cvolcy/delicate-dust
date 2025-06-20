@@ -46,13 +46,68 @@
                 const message = ref('Hello Vue!');
                 const notificationPermission = ref(false);
                 const isFetchingWord = ref(false);
-                const appData = ref(JSON.parse(localStorage.getItem('app_data')) || {});
+                const appData = ref({});
 
                 Notification.requestPermission().then(permission => {
                     if (permission === 'granted') {
                         notificationPermission.value = true;
                     }
                 });
+
+                async function checkPeriodicSyncPermission() {
+                    const status = await navigator.permissions.query({ name: 'periodic-background-sync' });
+                    await navigator.serviceWorker.ready;
+                    if (status.state === 'granted') {
+                        // Periodic background sync can be used.
+                        console.log('Periodic Background Sync permission granted.');
+                        return true;
+                    } else {
+                        // Permission not granted or not supported.
+                        console.log('Periodic Background Sync permission not granted or not supported.');
+                        // Inform the user or provide alternative functionality.
+                        return false;
+                    }
+                }
+
+                if('serviceWorker' in navigator) {
+                    navigator.serviceWorker.register("/api/static/rw-service-worker.js", { scope: '/api/static/' })
+                    .then(registration => {
+                        console.log('Service Worker registered with scope:', registration.scope);
+                        return navigator.serviceWorker.ready;
+                    })
+                    .then(async (registration) => {
+                        navigator.serviceWorker.addEventListener('message', (event) => {
+                            if (event.data && event.data.type === 'REFRESH_APP_DATA') {
+                                const { appData: newData } = event.data;
+
+                                appData.value = newData;
+                            }
+                        });
+
+                        registration.active.postMessage({ type: 'READY' });
+
+                        // Check for periodic background sync permission
+                        const permissionGranted = await checkPeriodicSyncPermission();
+
+                        if (permissionGranted && 'periodicSync' in registration) {
+                            try {
+                                // Register a periodic sync task for daily updates
+                                await registration.periodicSync.register('daily-notification-sync', {
+                                    minInterval: 12 * 60 * 60 * 1000, // Minimum interval of one day in milliseconds
+                                });
+                                console.log('Periodic background sync for daily notifications registered.');
+                            } catch (err) {
+                                console.error('Periodic Sync could not be registered:', err.name, err.message);
+                            }
+                        }
+                        else {
+                            console.warn('Periodic Background Sync not supported or permission not granted.');
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Service Worker registration failed:', error);
+                    });
+                }
 
                 return { message, notificationPermission, isFetchingWord, appData };
             },
@@ -70,29 +125,9 @@
 
                         if (this.notificationPermission) {
                             navigator.serviceWorker.ready.then(async registration => {
-                                const randomWord = await (await fetch("/api/randomword")).json();
-                                // const randomWord = JSON.parse(`{"fr": {"word": "épistolaire","definition": "relatif à l'art ou à la pratique de la correspondance écrite","example": "Son style épistolaire a captivé de nombreux lecteurs."},"en": {"word": "epistolary","definition": "relating to the art or practice of correspondence through letters","example": "Her epistolary style captivated many readers."}}`);
-                                const { fr: randomWordLocalized } = randomWord;
-    
-                                const title = 'Word Update : ' + randomWordLocalized.word;
-                                const options = {
-                                    body: `${randomWordLocalized.definition} \n\n ${randomWordLocalized.example}`,
-                                    tag: 'daily-update-notification',
-                                    renotify: true, // Optional: ensures new notification is shown if tag is reused
-                                    requireInteraction: false, // Optional: notification disappears after a short time on desktop
-                                    data: {
-                                        timestamp: Date.now(),
-                                        notificationType: 'daily_update'
-                                    }
-                                };
-    
-                                registration.showNotification(title, options)
-                                    .then(() => {
-                                        console.log('Daily notification displayed successfully!');
-                                    })
-                                    .catch((error) => {
-                                        console.error('Failed to show daily notification:', error);
-                                    });
+                                registration.active.postMessage({
+                                    type: 'SHOW_NOTIFICATION'
+                                });
                             });
                         }
                     }
@@ -102,50 +137,6 @@
                 }
             }
         }).mount('#app');
-    </script>
-    <script>
-    async function checkPeriodicSyncPermission() {
-        const status = await navigator.permissions.query({ name: 'periodic-background-sync' });
-        await navigator.serviceWorker.ready;
-        if (status.state === 'granted') {
-            // Periodic background sync can be used.
-            console.log('Periodic Background Sync permission granted.');
-            return true;
-        } else {
-            // Permission not granted or not supported.
-            console.log('Periodic Background Sync permission not granted or not supported.');
-            // Inform the user or provide alternative functionality.
-            return false;
-        }
-    }
-
-    if('serviceWorker' in navigator) {
-        navigator.serviceWorker.register("/api/static/rw-service-worker.js", { scope: '/api/static/' })
-        .then(async (registration) => {
-            console.log('Service Worker registered with scope:', registration.scope);
-
-            // Check for periodic background sync permission
-            const permissionGranted = await checkPeriodicSyncPermission();
-
-            if (permissionGranted && 'periodicSync' in registration) {
-                try {
-                    // Register a periodic sync task for daily updates
-                    await registration.periodicSync.register('daily-notification-sync', {
-                        minInterval: 12 * 60 * 60 * 1000, // Minimum interval of one day in milliseconds
-                    });
-                    console.log('Periodic background sync for daily notifications registered.');
-                } catch (err) {
-                    console.error('Periodic Sync could not be registered:', err.name, err.message);
-                }
-            }
-            else {
-                console.warn('Periodic Background Sync not supported or permission not granted.');
-            }
-        })
-        .catch((error) => {
-            console.error('Service Worker registration failed:', error);
-        });
-    }
     </script>
 </body>
 </html>
