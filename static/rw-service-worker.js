@@ -11,6 +11,8 @@ this.addEventListener('install', event => {
 });
 
 this.addEventListener('message', async (event) => {
+    console.log('Message received:', event.data);
+
     switch (event.data?.type) {
         case 'READY':
             event.source.postMessage({ type: 'REFRESH_APP_DATA', appData: await getAppData() });
@@ -31,8 +33,7 @@ this.addEventListener('periodicsync', (event) => {
 });
 
 async function showDailyNotification() {
-    const randomWord = await (await fetch("/api/randomword")).json();
-    // const randomWord = JSON.parse(`{"fr": {"word": "épistolaire","definition": "relatif à l'art ou à la pratique de la correspondance écrite","example": "Son style épistolaire a captivé de nombreux lecteurs."},"en": {"word": "epistolary","definition": "relating to the art or practice of correspondence through letters","example": "Her epistolary style captivated many readers."}}`);
+    console.log('Showing daily notification...')
     const { fr: randomWordLocalized } = randomWord;
 
     let data = await getAppData();
@@ -101,7 +102,6 @@ async function getAppData() {
 
         request.onerror = (event) => reject(event.target.errorCode);
         request.onsuccess = (event) =>  {
-            const data = event.target.result;
             return resolve(event.target.result);
         }
     });

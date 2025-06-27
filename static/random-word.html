@@ -34,7 +34,14 @@
                 >+</a>
             </div>
             <div class="w3-card w3-padding">
-                <pre><code>{{ JSON.stringify(appData, null, 2) }}</code></pre>
+                <table class="w3-table w3-striped w3-border">
+                    <template v-for="item in wordHistory" :key="item.id">
+                        <tr><th align="left">{{item.id}} -  {{item.v}}</th></tr>
+                        <tr><td>{{item.date}}</td></tr>
+                        <tr><td><b><em>{{item.word}}</em></b> : {{item.definition}}</td></tr>
+                        <tr><td class="w3-border-bottom">Example : {{item.example}}</td></tr>
+                    </template>
+                </table>
             </div>
         </div>
     </div>
@@ -110,6 +117,19 @@
                 }
 
                 return { message, notificationPermission, isFetchingWord, appData };
+            },
+            computed: {
+                wordHistory() {
+                    return this.appData.map(item => {
+                        return ({
+                            id: item.id,
+                            v: item.v,
+                            date: new Date(item.date),
+                            ...item['fr']
+                        });                        
+                    })
+                    .sort((a, b) => b.date - a.date);
+                }
             },
             methods: {
                 registerNotifications() {
