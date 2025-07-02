@@ -1,5 +1,9 @@
 const CACHE_NAME = 'random-word-v1';
 
+const DB_NAME = 'my_app_db';
+const STORE_NAME = 'app_data_store';
+const DB_VERSION = 1;
+
 // Use the install event to pre-cache all initial resources.
 this.addEventListener('install', event => {
     event.waitUntil((async () => {
@@ -34,6 +38,8 @@ this.addEventListener('periodicsync', (event) => {
 
 async function showDailyNotification() {
     console.log('Showing daily notification...')
+    // const randomWord = await (await fetch("/api/randomword")).json();
+    const randomWord = JSON.parse(`{"fr": {"word": "épistolaire","definition": "relatif à l'art ou à la pratique de la correspondance écrite","example": "Son style épistolaire a captivé de nombreux lecteurs."},"en": {"word": "epistolary","definition": "relating to the art or practice of correspondence through letters","example": "Her epistolary style captivated many readers."}}`);
     const { fr: randomWordLocalized } = randomWord;
 
     let data = await getAppData();
@@ -66,10 +72,6 @@ async function showDailyNotification() {
             console.error('Failed to show daily notification:', error);
         });
 }
-
-const DB_NAME = 'my_app_db';
-const STORE_NAME = 'app_data_store';
-const DB_VERSION = 1;
 
 function openDb() {
     return new Promise((resolve, reject) => {
