@@ -4,6 +4,7 @@ using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Azure.Data.Tables;
 using Azure.Storage.Queues;
@@ -27,9 +28,54 @@ namespace Cvolcy.DelicateDust.Functions
         private readonly QueueServiceClient _queueServiceClient = queueServiceClient;
         private readonly TableServiceClient _tableServiceClient = tableServiceClient;
 
+        [Function("GetTask")]
+        public async Task<IActionResult> GetTask(
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "Tasks/Get/{type}/{taskId}")] HttpRequest req,
+            string taskId,
+            TaskRequestType type,
+            CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("GetTask: C# HTTP trigger function processed a request.");
+
+            var tasksTable = _tableServiceClient.GetTableClient("tasks");
+            _ = await tasksTable.CreateIfNotExistsAsync();
+
+            var taskResult = await tasksTable.GetEntityIfExistsAsync<TaskResult>($"Results-{type}", taskId);
+
+            if (taskResult.HasValue)
+            {
+                return new OkObjectResult(new
+                {
+                    taskId = taskResult.Value.RowKey,
+                    type,
+                    status = "processed"
+                });
+            }
+
+            var tasksQueue = _queueServiceClient.GetQueueClient("tasks");
+            _ = await tasksQueue.CreateIfNotExistsAsync();
+
+            var messages = await tasksQueue.PeekMessagesAsync(maxMessages: 100, cancellationToken: cancellationToken);
+
+            foreach (var message in messages.Value)
+            {
+                var taskRequest = JsonSerializer.Deserialize<TaskRequest>(message.Body);
+
+                if (taskRequest.TaskId == taskId)
+                    return new OkObjectResult(new
+                    {
+                        taskId = taskRequest.TaskId,
+                        type = taskRequest.Type,
+                        status = "queued"
+                    });
+            }
+
+            return new NotFoundResult();
+        }
+
         [Function("SubmitTask")]
         public async Task<IActionResult> SubmitTask(
-            [HttpTrigger(AuthorizationLevel.Function, "post")] HttpRequest req)
+            [HttpTrigger(AuthorizationLevel.Function, "post", Route = "Tasks/Submit")] HttpRequest req)
         {
             _logger.LogInformation("SubmitTask: C# HTTP trigger function processed a request.");
 

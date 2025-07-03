@@ -10,7 +10,7 @@ namespace Cvolcy.DelicateDust.Models.Task
         public string PartitionKey { get => $"Results-{Type}"; }
     }
 
-    internal enum TaskRequestType
+    public enum TaskRequestType
     {
         DEBUG = 0,
     }
