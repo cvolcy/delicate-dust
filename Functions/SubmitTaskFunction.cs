@@ -73,12 +73,24 @@ namespace Cvolcy.DelicateDust.Functions
                 var partitionKey = $"Results-{type}";
                 var taskResultResponse = await tasksTableClient.GetEntityIfExistsAsync<TaskResult>(partitionKey, taskId, cancellationToken: cancellationToken);
 
-                if (taskResultResponse.HasValue)
+                if (taskResultResponse.HasValue && taskResultResponse.Value is TaskResult taskResult)
                 {
+
+                    if (string.IsNullOrWhiteSpace(taskResult.Output))
+                    {
+                        _logger.LogInformation("GetTaskStatus: Task '{TaskId}' of type '{Type}' found as 'processed' in Table Storage.", taskId, type);
+                        return new OkObjectResult(new
+                        {
+                            taskId = taskResult.RowKey,
+                            type,
+                            status = "processing"
+                        });
+                    }
+
                     _logger.LogInformation("GetTaskStatus: Task '{TaskId}' of type '{Type}' found as 'processed' in Table Storage.", taskId, type);
                     return new OkObjectResult(new
                     {
-                        taskId = taskResultResponse.Value.RowKey,
+                        taskId = taskResult.RowKey,
                         type,
                         status = "processed"
                     });
@@ -186,7 +198,7 @@ namespace Cvolcy.DelicateDust.Functions
                 _logger.LogInformation("SubmitNewTask: Task '{TaskId}' of type '{Type}' submitted to queue.", taskRequest.TaskId, taskRequest.Type);
 
                 var stopWatch = Stopwatch.StartNew();
-                var pollingTimeout = TimeSpan.FromSeconds(5);
+                var pollingTimeout = TimeSpan.FromSeconds(3);
                 var pollingInterval = TimeSpan.FromMilliseconds(500);
 
                 while (stopWatch.Elapsed < pollingTimeout)
@@ -194,7 +206,9 @@ namespace Cvolcy.DelicateDust.Functions
                     var resultPartitionKey = $"Results-{taskRequest.Type}";
                     var resultResponse = await tasksTableClient.GetEntityIfExistsAsync<TaskResult>(resultPartitionKey, taskRequest.TaskId);
 
-                    if (resultResponse.HasValue && resultResponse.Value is TaskResult taskResult)
+                    if (resultResponse.HasValue
+                        && resultResponse.Value is TaskResult taskResult
+                        && !string.IsNullOrWhiteSpace(taskResult.Output))
                     {
                         _logger.LogInformation("SubmitNewTask: Task '{TaskId}' processed immediately. Returning result.", taskRequest.TaskId);
                         return new OkObjectResult(new
@@ -243,6 +257,9 @@ namespace Cvolcy.DelicateDust.Functions
             CancellationToken cancellationToken = default)
         {
             _logger.LogInformation("ProcessTaskQueueMessage: C# Queue trigger function received message ID: '{MessageId}'.", message.MessageId);
+            
+            var tasksTableClient = _tableServiceClient.GetTableClient(TasksTableName);
+            await tasksTableClient.CreateIfNotExistsAsync(cancellationToken);
 
             TaskRequest request;
             try
@@ -253,6 +270,15 @@ namespace Cvolcy.DelicateDust.Functions
                     _logger.LogError("ProcessTaskQueueMessage: Deserialized task request is null for message ID '{MessageId}'. Body: '{MessageBody}'", message.MessageId, message.Body.ToString());
                     return;
                 }
+                
+
+                var entity = new TaskResult
+                {
+                    PartitionKey = $"Results-{request.Type}",
+                    RowKey = request.TaskId,
+                    Timestamp = DateTimeOffset.UtcNow
+                };
+                await tasksTableClient.UpsertEntityAsync(entity, TableUpdateMode.Replace, cancellationToken);
             }
             catch (JsonException jsonEx)
             {
@@ -287,10 +313,7 @@ namespace Cvolcy.DelicateDust.Functions
                     Timestamp = DateTimeOffset.UtcNow,
                     Output = resultJson
                 };
-
-                var tasksTableClient = _tableServiceClient.GetTableClient(TasksTableName);
-                await tasksTableClient.CreateIfNotExistsAsync(cancellationToken);
-                await tasksTableClient.UpsertEntityAsync(entity, TableUpdateMode.Replace, cancellationToken);
+                await tasksTableClient.UpsertEntityAsync(entity, TableUpdateMode.Merge, cancellationToken);
                 _logger.LogInformation("ProcessTaskQueueMessage: Task '{TaskId}' result saved to Table Storage.", request.TaskId);
 
                 if (!string.IsNullOrWhiteSpace(request.CallbackUrl))
