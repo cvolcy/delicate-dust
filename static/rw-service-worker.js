@@ -38,8 +38,8 @@ this.addEventListener('periodicsync', (event) => {
 
 async function showDailyNotification() {
     console.log('Showing daily notification...')
-    // const randomWord = await (await fetch("/api/randomword")).json();
-    const randomWord = JSON.parse(`{"fr": {"word": "épistolaire","definition": "relatif à l'art ou à la pratique de la correspondance écrite","example": "Son style épistolaire a captivé de nombreux lecteurs."},"en": {"word": "epistolary","definition": "relating to the art or practice of correspondence through letters","example": "Her epistolary style captivated many readers."}}`);
+    const randomWord = await (await fetch("/api/randomword")).json();
+    // const randomWord = JSON.parse(`{"fr": {"word": "épistolaire","definition": "relatif à l'art ou à la pratique de la correspondance écrite","example": "Son style épistolaire a captivé de nombreux lecteurs."},"en": {"word": "epistolary","definition": "relating to the art or practice of correspondence through letters","example": "Her epistolary style captivated many readers."}}`);
     const { fr: randomWordLocalized } = randomWord;
 
     let data = await getAppData();
