@@ -30,6 +30,7 @@ namespace Cvolcy.DelicateDust.Functions
             {
                 var prompt = $"Choose a random **uncommon** word starting with the letter `{(char)('a' + new Random().Next(26))}`. (random seed {new Random().Next()})" +
                              "Provide a concise, clear definition. " +
+                             "Provide a phrase example that would help understand the word. " +
                              "Return it in the format of " +
                              "{ \"fr\": { \"word\": \"random_word_in_french\", \"definition\": \"definition_in_french\", \"example\": \"phrase_example_in_french\" }, " +
                              "\"en\": { \"word\": \"random_word_in_english\", \"definition\": \"definition_in_english\", \"example\": \"phrase_example_in_english\" } } " +
